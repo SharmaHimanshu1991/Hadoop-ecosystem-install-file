@@ -1,0 +1,160 @@
+Refernce from Adhoc network limited
+http://slashbigdata.blogspot.com/2017/07/hadoop-v1-vs-hadoop-v2.html
+
+if u use VM machine then download VM machine
+yum install virt-manager
+
+to start VM
+virt-manager
+
+download  redhat ios 
+wget ftp://192.168.10.254/pub/rhvmdnd.qcow2
+
+load redhat IOS file to VM
+
+1 download hadoop for both namenode and datanode
+https://archive.apache.org/dist/hadoop/core/ 
+or
+wget ftp://192.168.10.254/pub/Apache_Hadoop/hadoop-2.7.3.tar.gz
+2 Download jdk 1.8  from oracle  website 
+
+	http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+
+
+3 go to Virtual machine(VM) 
+hostname - I
+hostnamectl set-hostname  namenode[writne any name]
+hostname
+
+4 go to second VM
+hostname
+hostnamectl set-hostname  datanode[writne any name]
+hostname
+
+
+5  we r doing this because to ping with cluster name
+go to 
+vim /etc/hosts
+write IP and cluster name
+192.168.122.104 namenode
+192.168.122.217 datanode
+
+6 tranfer file from root terminal to VM or vice versa
+	file  to transfer		where to tranfer & path
+scp /root/hadoop2/hadoop-2.7.3.tar.gz 192.168.122.186:/root/ 
+
+
+7 Flush   firewall  and  disable  Selinux   on  each  node
+type this command for both namenode & datanode on terminal to login in cluster from terminal
+ssh -X root@192.168.122.104
+ssh -X root@192.168.122.217
+
+[root@server76 ~]#setenforce  0
+[root@server76 ~]# iptables -F
+to check firewall is desiable or not for both 
+getenforce
+OR
+0
+[root@server76 ~]# systemctl disable --now firewalld   #  for production you can add firewall ruels 
+
+
+8 setting  jdk path 
+
+[namenode.cluster1.com ]#  vim  /root/.bashrc
+# .bashrc
+
+# User specific aliases and functions
+
+
+export JAVA_HOME=/usr/java/jdk1.8.0_121
+
+export HADOOP_HOME=/hadoop2
+export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
+
+after writing in bash, exit then
+exec bash
+or
+source ~/.bashrc
+
+9 go to this directory
+cd /hadoop2/etc/hadoop/
+
+10 configure all this file on namenode and datanode
+ vim hadoop-env.sh 
+ vim hdfs-site.xml 
+ vim core-site.xml 
+
+11 now  start name node by this command
+hdfs  namenode -format 
+hadoop-daemon.sh start namenode
+
+12  now  start data node by this command
+hadoop-daemon.sh start namenode
+
+13 configure this file at namenode side
+vim mapred-site.xml.template
+vim yarn-site.xml
+
+14 start name nose resource manager 
+yarn-daemon.sh start resourcemanager 
+
+15 configure at datanode yarn file
+vim yarn-site.xml
+
+16 start datanode yarn node manager
+yarn-daemon.sh start nodemanager
+
+17 use jps to see which is working
+us namenodeIP:50070 port to show in browser
+fee -m to show virtual machine memory
+
+18 to know any directory in hadoop 
+hadoop fs -ls /
+-- make a directory in hadoop cluster
+hadoop fs -mkdir /inputDir
+hadoop fs -mkdir /outputDir
+
+--- putting file from one dirctory to hadoop input  directory 
+hadoop fs -put /inputDir
+
+--- check input dir is there file is not 
+hadoop fs -ls /inputDir
+
+---run a wordcount program
+yarn jar /hadoop2/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.3.jar wordcount /inputDir/text.txt /output/op1
+
+---- checking output of program
+hadoop fs -ls /output/op1
+hadoop fs -cat /output/op1/part-r-00000
+
+--- to check how many hadoop-mapreduce-client-common-2.7.3.jar contain 
+hadoop jar /hadoop2/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.7.3.jar
+
+
+Hadoop V1 :  
+
+challenges :
+
+
+     Batch processing  only supported  i.e  only map reduce processing is achieved 
+     Single point of failure due to name node down
+     External data storage is needed for real time processing or graph analysis
+     Doesn't support multi-tenancy   (means can't processing multiple jobs at the same time)
+     can't run more 4000 cluster with better performance 
+
+
+Hadoop V2:  
+
+     HDFS  federation 
+     multiple namenode 
+     for Map reducing here YARN             
+
+    For better  processing control
+    support for non mapreduce type processing
+    support for multi-tenancy 
+
+
+
+
+9 
+
