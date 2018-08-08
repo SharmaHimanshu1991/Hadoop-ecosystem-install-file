@@ -97,7 +97,7 @@ pyspark
 
 to see spark in browser
     namenode IP	       port
-http://192.168.122.228:4040
+http://192.168.122.228:4042
 ###############################################
 
 vim /root/.bashrc or vim ~/.bashrc
